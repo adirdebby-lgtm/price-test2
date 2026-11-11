@@ -1,9 +1,25 @@
-"""Find the store branches near Holon (Kiryat Ben Gurion) for Shufersal, Rami Levy and Yohananof.
-Downloads each chain's stores file and prints the stores in Holon / Bat Yam / Rishon / Tel Aviv / Azor. Nothing is kept."""
-import glob, gzip, io, os, re, traceback, zipfile
-from il_supermarket_scarper import ScarpingTask
+"""Candidate products for the price comparison.
+Downloads the full price file of ONE branch per chain (Shufersal Deal Holon-Golda 123, Rami Levy Holon 050, Yohananof Holon HaMerkava 073),
+keeps only the barcodes that all three chains sell, and for each everyday item prints the cheapest candidates. Nothing is kept."""
+import asyncio, glob, gzip, io, os, re, traceback, zipfile
+from il_supermarket_scarper.scrapper_runner import MainScrapperRunner, _scrape_one
 
-CITIES = ("חולון", "בת ים", "בת-ים", "ראשון", "תל אביב", "תל-אביב", "אזור", "יפו")
+STORES = {"SHUFERSAL": 123, "RAMI_LEVY": 50, "YOHANANOF": 73}
+SHORT = {"SHUFERSAL": "שופ", "RAMI_LEVY": "רמי", "YOHANANOF": "יוח"}
+
+# (search word, words to exclude)
+WANTED = [
+    ("חלב", "שוקולד|אבקת|קוקוס|שקדים|סויה|עיזים|תינוק|מרכך|קרם|סבון|ג'ל|גוף|שיבולת|אורז|קפה|קפסול|חלבון|חלבה|מעדן|דנונה|מילקי|פודינג"),
+    ("ביצים", "שוקולד|שוקו|ביצת"), ("לחם", "ממרח|פירורי|שוקולד|חמאה"), ("חמאה", "בוטנים|שקדים|שוקולד|קקאו|קרם"),
+    ("קוטג", ""), ("שמנת", "קוקוס|צמחית"), ("יוגורט", "מעדן|ילדים"), ("גבינה צהובה", ""), ("גבינת שמנת", ""), ("גבינה לבנה", ""),
+    ("אורז", "עוגיות|פריכיות|חלב|נס"), ("פסטה", "רוטב"), ("ספגטי", "רוטב"), ("קמח", ""), ("סוכר", "ללא|דל|תחליף|חום"), ("מלח", ""),
+    ("שמן קנולה", ""), ("שמן זית", ""), ("שמן חמניות", ""), ("טונה", ""), ("קפה נמס", ""), ("תה", "קרם|סבון|שמפו|מרכך|בושם|תה קר"),
+    ("שוקולד", ""), ("חומוס", "יבש"), ("טחינה", ""), ("מיונז", ""), ("קטשופ", ""), ("תירס", ""), ("מלפפונים חמוצים", ""),
+    ("נייר טואלט", ""), ("מגבות נייר", ""), ("שקיות אשפה", ""), ("אבקת כביסה", ""), ("נוזל כלים", ""), ("מרכך כביסה", ""),
+    ("שמפו", ""), ("משחת שיניים", ""), ("סבון", "כלים|כביסה"), ("מים מינרליים", ""), ("קולה", ""), ("מיץ", ""), ("בירה", ""),
+    ("קורנפלקס", ""), ("דגני בוקר", ""), ("פיתות", ""), ("במבה", ""), ("ביסלי", ""), ("דבש", ""), ("ריבה", ""), ("עדשים", ""),
+    ("עוף", "מרק|אבקת|תבלין|רוטב"), ("חזה עוף", ""), ("שניצל", ""), ("נקניקיות", ""), ("סלמון", ""), ("חציל", ""),
+]
 
 def text_of(path):
     raw = open(path, "rb").read()
@@ -21,51 +37,55 @@ def text_of(path):
             pass
     return ""
 
-def field(block, *names):
-    for n in names:
-        m = re.search(rf"<{n}>(.*?)</{n}>", block, re.S | re.I)
-        if m and m.group(1).strip():
-            return re.sub(r"<!\[CDATA\[|\]\]>", "", m.group(1)).strip()
-    return ""
-
-def parse_stores(xml):
-    out = []
-    for m in re.finditer(r"<(store|branch)>(.*?)</\1>", xml, re.S | re.I):
-        b = m.group(2)
-        out.append((field(b, "StoreId", "StoreID", "BranchId"), field(b, "StoreName", "BranchName"),
-                    field(b, "Address"), field(b, "City")))
+def items_of(xml):
+    out = {}
+    for it in re.findall(r"<Item>.*?</Item>", xml, re.S | re.I):
+        g = lambda *ns: next((re.sub(r"<!\[CDATA\[|\]\]>", "", m.group(1)).strip() for n in ns
+                              for m in [re.search(rf"<{n}>(.*?)</{n}>", it, re.S | re.I)] if m and m.group(1).strip()), "")
+        code, name, price = g("ItemCode"), g("ItemNm", "ItemName"), g("ItemPrice")
+        if code and name and price:
+            try:
+                out[code] = (name, float(price))
+            except ValueError:
+                pass
     return out
 
-def run(chain):
-    print(f"\n===== {chain} =====", flush=True)
+def fetch(chain, store):
     out = os.path.join("dumps", chain)
-    task = ScarpingTask(
-        enabled_scrapers=[chain], files_types=["STORE_FILE"], multiprocessing=1,
+    runner = MainScrapperRunner(enabled_scrapers=[chain], multiprocessing=1,
         output_configuration={"output_mode": "disk", "base_storage_path": out},
         status_configuration={"database_type": "json", "base_path": os.path.join("status", chain)})
-    task.start(limit=1)
-    task.join()
-    files = [f for f in glob.glob(os.path.join(out, "**", "*"), recursive=True) if os.path.isfile(f)]
-    total = 0
-    for f in files:
-        stores = parse_stores(text_of(f))
-        total += len(stores)
-        print(f"file: {os.path.basename(f)}  stores in file: {len(stores)}")
-        hits = [s for s in stores if any(c in (s[1] + " " + s[2] + " " + s[3]) for c in CITIES)]
-        for sid, name, addr, city in hits:
-            print(f"  STORE id={sid} | {name} | {addr} | {city}")
-        if not hits:
-            for s in stores[:5]:
-                print("  (no match, first stores)", s)
-    print(f"{chain}: {len(files)} file(s), {total} stores")
-    return total
+    asyncio.run(_scrape_one(chain, limit=5, single_pass=True, files_types=["PRICE_FULL_FILE"], store_id=store,
+                            file_output=runner._file_outputs[chain], status_database=runner._status_databases[chain]))
+    files = [f for f in glob.glob(os.path.join(out, "**", "*"), recursive=True)
+             if os.path.isfile(f) and re.search(rf"PriceFull.*-0*{store}-20\d{{6}}", os.path.basename(f))]   # exactly this branch
+    files.sort()
+    files = files[::-1]                                                                                    # newest first
+    print(f"{chain} store {store}: files = {[os.path.basename(f) for f in files]}", flush=True)
+    return items_of(text_of(files[0])) if files else {}
 
-summary = {}
-for chain in ("SHUFERSAL", "RAMI_LEVY", "YOHANANOF"):
+data = {}
+for chain, store in STORES.items():
     try:
-        summary[chain] = run(chain)
+        data[chain] = fetch(chain, store)
+        print(f"{chain}: {len(data[chain])} items", flush=True)
     except Exception:
-        print(f"{chain}: FAILED"); traceback.print_exc(); summary[chain] = -1
+        print(f"{chain}: FAILED"); traceback.print_exc(); data[chain] = {}
+
+common = set.intersection(*[set(d) for d in data.values() if d]) if all(data.values()) else set()
+print(f"\nbarcodes sold by all three chains: {len(common)}")
+print("\n===== CANDIDATES (cheapest first) =====")
+for word, bad in WANTED:
+    rows = []
+    for code in common:
+        n0 = data["SHUFERSAL"][code][0]
+        if word in n0 and not (bad and re.search(bad, n0)):
+            rows.append((min(data[c][code][1] for c in data), code))
+    rows.sort()
+    print(f"\n## {word}  ({len(rows)} candidates)")
+    for _, code in rows[:6]:
+        cells = " | ".join(f"{SHORT[c]} {data[c][code][1]:.2f}" for c in STORES)
+        print(f"  {code}  {data['SHUFERSAL'][code][0]}  ::  {cells}")
 print("\n===== SUMMARY =====")
-for c, n in summary.items():
-    print(f"{c}: " + ("FAILED (error)" if n < 0 else f"{n} stores"))
+for c in STORES:
+    print(f"{c}: {len(data[c])} items" if data[c] else f"{c}: NO DATA")
