@@ -1,0 +1,20 @@
+name: בדיקת מוצר
+on:
+  workflow_dispatch:
+    inputs:
+      word:
+        description: "מילה לחיפוש (למשל סוכר)"
+        default: "סוכר"
+jobs:
+  diag:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - run: pip install il-supermarket-scraper==1.0.8
+      - run: playwright install --with-deps chromium
+        continue-on-error: true
+      - run: python diag.py "${{ github.event.inputs.word }}" 2>&1 | grep -v "logger.py"
