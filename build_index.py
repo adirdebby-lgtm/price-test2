@@ -223,7 +223,9 @@ SPECS = [
      r""),
     ('שמפו',
      r"שמפו",
-     r"קרם|מרכך|כלב",
+     (
+         r"קרם|מרכך|כלב|יבש|פגום|צבע|קשקש|תינוק|ילדים|"
+         r"רפואי|נגד"),
      r""),
     ('משחת שיניים',
      r"משחת שיניים",
@@ -255,7 +257,7 @@ SPECS = [
      r"קורנפלקס|קורן פלקס",
      (
          r"מילקי|טופ|מעדן|חטיף|שוקולד|עוגיות|חלב|דנונה|"
-         r"בר |קליק"),
+         r"בר |קליק|דבש|שוקו|בטעם|קראנצ|פרוסט|אפרסק|תות"),
      r""),
     ('במבה',
      r"במבה",
@@ -317,7 +319,7 @@ def build(data):
     lines, report, kw_done = [], [], 0
     for kw, inc, exc, size in SPECS:
         cands = []
-        for code in common:
+        for code in sorted(common):
             name = data["SHUFERSAL"][code][0]
             if re.search(inc, name) and not (exc and re.search(exc, name)):
                 prices = [data[c][code][1] for c in chains]
@@ -331,7 +333,7 @@ def build(data):
             special = 1 if SPECIAL.search(name) else 0
             sized = 0 if (not size or re.search(size, name)) else 1          # usual pack size first
             avg = sum(prices) / len(prices)
-            return (special, sized, avg)
+            return (special, sized, round(avg, 2), name)      # name last: same result on every run
         cands.sort(key=key)
         seen, picked = set(), []
         for name, prices, code in cands:
