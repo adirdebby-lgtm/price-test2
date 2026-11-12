@@ -1,12 +1,14 @@
 """Daily price index for the fridge kiosk.
-Downloads the full price file of one branch per chain (Shufersal Deal Holon-Golda 123, Rami Levy Holon 050,
-Yohananof Holon HaMerkava 073), keeps the barcodes that all three chains sell, and for each everyday product type
+Downloads the full price file of one branch per chain (Shufersal Deal Holon-Golda 123, Rami Levy Bat Yam 045,
+Yohananof Rishon Ramat Eliyahu 028, Super Dosh Holon 039, Osher Ad Rishon 025), keeps the barcodes that all the chains sell, and for each everyday product type
 writes the "regular cheapest" product first, followed by other variants (so the device can narrow by words like 3% or נטול לקטוז).
 Output: prices.tsv (a few dozen KB) that the kiosk downloads once a day."""
 import asyncio, datetime, glob, gzip, io, os, re, sys, traceback, zipfile
 
-STORES = {"SHUFERSAL": 123, "RAMI_LEVY": 50, "YOHANANOF": 73}
-CHAIN_NAMES = {"SHUFERSAL": "שופרסל", "RAMI_LEVY": "רמי לוי", "YOHANANOF": "יוחננוף"}
+STORES = {"SHUFERSAL": 123, "RAMI_LEVY": 45, "YOHANANOF": 28,
+          "FRESH_MARKET_AND_SUPER_DOSH": 39, "OSHER_AD": 25}
+CHAIN_NAMES = {"SHUFERSAL": "שופרסל", "RAMI_LEVY": "רמי לוי", "YOHANANOF": "יוחננוף",
+               "FRESH_MARKET_AND_SUPER_DOSH": "סופר דוש", "OSHER_AD": "אושר עד"}
 MAX_VARIANTS = 10
 L1 = r"(?<![\d.,])1\s?ל(?![א-ת])|1\s?ליטר|ליטר"          # "1ל" / "1 ליטר"
 
@@ -338,7 +340,7 @@ def build(data):
             lines.append("\t".join([kw, name.replace("\t", " ")] + [f"{p:.2f}" for p in prices]))
         report.append(f"{kw}: {len(cands)} candidates -> default: {picked[0][0]}  " + " | ".join(f"{p:.2f}" for p in picked[0][1]))
     today = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=2))).date().isoformat()
-    head = ["#v1", f"#date\t{today}", "#place\tחולון", "#chains\t" + "\t".join(CHAIN_NAMES[c] for c in chains)]
+    head = ["#v1", f"#date\t{today}", "#place\tחולון · בת ים · ראשל״צ", "#chains\t" + "\t".join(CHAIN_NAMES[c] for c in chains)]
     return "\n".join(head + lines) + "\n", report, kw_done
 
 # ---------------------------------------------------------------------------------------------- download
