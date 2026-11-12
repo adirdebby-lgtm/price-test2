@@ -308,6 +308,8 @@ SPECS = [
 # words that make a product "special": the family gets the plain version unless it asks for these
 SPECIAL = re.compile(r"(?<![א-ת])(נטול|דל|ללא|לייט|אורגני|בטעם|עיזים|טבעוני|זירו|דיאט|פרו|מופחת|קפסולות|בייבי|מועשר ב)(?![א-ת])")
 
+ALIASES = {"נוזל כלים": ["סבון כלים", "סבון לכלים", "נוזל לכלים"]}      # other ways the family may say it
+
 def build(data):
     """data: {chain: {barcode: (name, price)}} -> (tsv text, report text)"""
     chains = list(CHAIN_NAMES)
@@ -341,7 +343,8 @@ def build(data):
                 break
         kw_done += 1
         for name, prices in picked:
-            lines.append("\t".join([kw, name.replace("\t", " ")] + [f"{p:.2f}" for p in prices]))
+            for k in [kw] + ALIASES.get(kw, []):
+                lines.append("\t".join([k, name.replace("\t", " ")] + [f"{p:.2f}" for p in prices]))
         report.append(f"{kw}: {len(cands)} candidates -> default: {picked[0][0]}  " + " | ".join(f"{p:.2f}" for p in picked[0][1]))
     today = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=2))).date().isoformat()
     head = ["#v1", f"#date\t{today}", "#place\tחולון · בת ים · ראשל״צ", "#chains\t" + "\t".join(CHAIN_NAMES[c] for c in chains)]
