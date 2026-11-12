@@ -340,13 +340,13 @@ def build(data):
             if (name, tuple(prices)) in seen:
                 continue
             seen.add((name, tuple(prices)))
-            picked.append((name, prices))
+            picked.append((name, prices, code))
             if len(picked) >= MAX_VARIANTS:
                 break
         kw_done += 1
-        for name, prices in picked:
+        for name, prices, code in picked:
             for k in [kw] + ALIASES.get(kw, []):
-                lines.append("\t".join([k, name.replace("\t", " ")] + [f"{p:.2f}" for p in prices]))
+                lines.append("\t".join([k, name.replace("\t", " ")] + [f"{p:.2f}" for p in prices] + [code]))
         report.append(f"{kw}: {len(cands)} candidates -> default: {picked[0][0]}  " + " | ".join(f"{p:.2f}" for p in picked[0][1]))
     today = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=2))).date().isoformat()
     head = ["#v1", f"#date\t{today}", "#place\tחולון · בת ים · ראשל״צ", "#chains\t" + "\t".join(CHAIN_NAMES[c] for c in chains)]
