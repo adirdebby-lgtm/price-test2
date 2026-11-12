@@ -38,7 +38,7 @@ SPECS = [
      r"1\s?ק|500|1000"),
     ("פסטה", r"^פסטה", r"רוטב|טונה|מנה חמה|סלט|ארוחה|מוכן|נודלס", r"500"),
     ("ספגטי", r"ספגטי", r"רוטב|מנה חמה|בולונז|סלט|ארוחה|נודלס", r"500"),
-    ("מקרוני", r"^מקרוני", r"גבינה|מנה|סלט", r"500"),
+    ("מקרוני", r"מקרוני", r"גבינה|מנה|סלט", r"500"),
     ("אטריות", r"^אטריות", r"מנה|מרק|נודלס|סינית|נמס", r""),
     ("פתיתים", r"^פתיתים", r"קוואקר|תינוקות|גרנולה", r""),
     ("קוסקוס", r"^קוסקוס", r"", r""),
@@ -49,9 +49,9 @@ SPECS = [
      r"1\s?ק|500|1000"),
     ("מלח", r"^מלח", r"פריכ|מרגרינה|פלפל|חטיף|במלח", r""),
     ("שמן קנולה", r"^שמן קנולה", r"טונה|תרסיס|נתחי|פסטה|לבנה|סרדין", L1),
-    ("שמן זית", r"^שמן זית", r"טונה|תרסיס|לבנה|פסטה|סרדין", r""),
+    ("שמן זית", r"שמן זית", r"ב\s?שמן זית|טונה|תרסיס|לבנה|פסטה|סרדין|זיתים|סבון|קרם|שמפו|תבלין", r""),
     ("שמן חמניות", r"^שמן חמניות", r"", L1),
-    ("טונה", r"טונה", r"סלט|פסטה|אורז|חתול|פריסקיז|פנסי|ירקות|נ\.פילה|מרק|ס\.ק", r""),
+    ("טונה", r"טונה", r"סלט|פסטה|אורז|חתול|פריסקיז|פנסי|ירקות|נ\.פילה|מרק|ס\.ק|חומוס|גרגיר|תירס|שעועית|עגבני", r""),
     ("קפה",
      r"קפה נמס|נס קפה|קפה טחון|קפה שחור|קפה טורקי|קפה עלית",
      r"פינוקיות|קרם|וניל|שוקו|קר|קפסול|חלב|בטעם|ביסקוויט|עוגיות|גלידה|ממרח|3\s?ב",
@@ -70,7 +70,7 @@ SPECS = [
     ("חומץ", r"^חומץ", r"", r""),
     ("תירס", r"^(שימורי )?תירס", r"שניצל|חטיף|פופקורן|פריכ|קפוא|גרעיני", r""),
     ("מלפפונים חמוצים", r"מלפפו", r"טרי", r"חמוצ|במלח|בחומץ|מלפפו\.ב"),
-    ("רסק עגבניות", r"רסק עגבני", r"", r""),
+    ("רסק עגבניות", r"רסק עגבני|ר\.? ?עגבני|רסק מרוכז", r"עוף|טונה|פסטה|פיצה|רוטב", r""),
     ("נייר טואלט", r"נייר טואלט|ניר טואלט|נ\.טואלט", r"", r""),
     ("מגבות נייר", r"מגבות נייר|מגבת נייר|ניר מטבח", r"", r""),
     ("שקיות אשפה", r"שקיות אשפה|שקיות זבל|שקית אשפה|שקיות לאשפה", r"", r""),
@@ -79,7 +79,7 @@ SPECS = [
      r"מרכך|מסיר|כתמים|מנקה|מכונת",
      r""),
     ("מרכך כביסה", r"מרכך", r"שיער|שמפו|קונדישנר", r""),
-    ("נוזל כלים", r"נוזל כלים|סבון כלים|נוזל לכלים", r"", r""),
+    ("נוזל כלים", r"פיירי|סנו|נוזל ל?כלים|סבון ל?כלים|ג'ל ל?כלים", r"מדיח", r""),
     ("שמפו", r"שמפו", r"קרם|מרכך|כלב", r""),
     ("משחת שיניים", r"משחת שיניים", r"", r""),
     ("סבון", r"^סבון", r"כלים|כביסה|כלי", r""),
@@ -88,129 +88,12 @@ SPECS = [
      r"חמצן|קרם|פנים|ורדים|טעם|מעדן|נוזל|טוניק|סבון|מי פה",
      r"1\.5|1,5|ליטר"),
     ("קולה", r"קולה", r"", r""),
-    ("מיץ", r"^מיץ|פרימור|פרי גיל", r"", r""),
+    ("מיץ", r"^מיץ|פרימור|פרי גיל", r"משומר|לימון|ליים|רימון", r""),
     ("בירה", r"^בירה|גולדסטאר|קרלסברג|הייניקן", r"", r""),
-    ("קורנפלקס", r"קורנפלקס|קורן פלקס", r"", r""),
-    ("במבה", r"במבה", r"", r""),
+    ("קורנפלקס", r"קורנפלקס|קורן פלקס", r"מילקי|טופ|מעדן|חטיף|שוקולד|עוגיות|חלב", r""),
+    ("במבה", r"במבה", r"מתוקה|נוגט|שוקולד", r"60|80|100"),
     ("ביסלי", r"ביסלי", r"", r""),
     ("פופקורן", r"פופקורן", r"", r""),
-    ("דבש", r"^דבש", r"חרדל|ממרח|עוגיות|טעם|פופקו|עוגת|שיפון", r""),
-    ("ריבה", r"^ריבה|^ממרח ריבה", r"", r""),
-    ("עדשים", r"עדשים", r"אורז|מרק|מנה|שניצל|סלט|נודלס|ירקות|קציצות|בולגור", r""),
-    ("נקניקיות", r"^נקניקיות", r"", r""),
-    ("שניצל", r"^שניצל", r"", r""),
-    ("צ'יפס", r"^צ.יפס|^צ'יפס", r"", r""),
-    ("עוגיות", r"^עוגיות", r"בצק", r""),
-]
-
-# words that make a product "special": the family gets the plain version unless it asks for these
-SPECIAL = re.compile(r"(?<![א-ת])(נטול|דל|ללא|לייט|אורגני|בטעם|עיזים|טבעוני|זירו|דיאט|פרו|מועשר ב)(?![א-ת])")
-
-def build(data):
-    """data: {chain: {barcode: (name, price)}} -> (tsv text, report text)"""
-    chains = list(CHAIN_NAMES)
-    common = set.intersection(*[set(data[c]) for c in chains])
-    lines, report, kw_done = [], [], 0
-    for kw, inc, exc, size in SPECS:
-        cands = []
-        for code in common:
-            name = data["SHUFERSAL"][code][0]
-            if re.search(inc, name) and not (exc and re.search(exc, name)):
-                prices = [data[c][code][1] for c in chains]
-                if min(prices) > 0:
-                    cands.append((name, prices, code))
-        if not cands:
-            report.append(f"{kw}: NO CANDIDATES")
-            continue
-        def key(x):
-            name, prices, _ = x
-            special = 1 if SPECIAL.search(name) else 0
-            sized = 0 if (not size or re.search(size, name)) else 1          # usual pack size first
-            avg = sum(prices) / len(prices)
-            return (special, sized, avg)
-        cands.sort(key=key)
-        seen, picked = set(), []
-        for name, prices, code in cands:
-            if (name, tuple(prices)) in seen:
-                continue
-            seen.add((name, tuple(prices)))
-            picked.append((name, prices))
-            if len(picked) >= MAX_VARIANTS:
-                break
-        kw_done += 1
-        for name, prices in picked:
-            lines.append("\t".join([kw, name.replace("\t", " ")] + [f"{p:.2f}" for p in prices]))
-        report.append(f"{kw}: {len(cands)} candidates -> default: {picked[0][0]}  " + " | ".join(f"{p:.2f}" for p in picked[0][1]))
-    today = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=2))).date().isoformat()
-    head = ["#v1", f"#date\t{today}", "#place\tחולון", "#chains\t" + "\t".join(CHAIN_NAMES[c] for c in chains)]
-    return "\n".join(head + lines) + "\n", report, kw_done
-
-# ---------------------------------------------------------------------------------------------- download
-def text_of(path):
-    raw = open(path, "rb").read()
-    for opener in (lambda c: gzip.decompress(c),
-                   lambda c: zipfile.ZipFile(io.BytesIO(c)).read(zipfile.ZipFile(io.BytesIO(c)).namelist()[0]),
-                   lambda c: c):
-        try:
-            txt = opener(raw)
-            for enc in ("utf-8", "utf-16", "cp1255"):
-                try:
-                    return txt.decode(enc)
-                except Exception:
-                    pass
-        except Exception:
-            pass
-    return ""
-
-def items_of(xml):
-    out = {}
-    for it in re.findall(r"<Item>.*?</Item>", xml, re.S | re.I):
-        g = lambda *ns: next((re.sub(r"<!\[CDATA\[|\]\]>", "", m.group(1)).strip() for n in ns
-                              for m in [re.search(rf"<{n}>(.*?)</{n}>", it, re.S | re.I)] if m and m.group(1).strip()), "")
-        code, name, price = g("ItemCode"), g("ItemNm", "ItemName"), g("ItemPrice")
-        if code and name and price:
-            try:
-                out[code] = (name, float(price))
-            except ValueError:
-                pass
-    return out
-
-def fetch(chain, store):
-    from il_supermarket_scarper.scrapper_runner import MainScrapperRunner, _scrape_one
-    out = os.path.join("dumps", chain)
-    runner = MainScrapperRunner(enabled_scrapers=[chain], multiprocessing=1,
-        output_configuration={"output_mode": "disk", "base_storage_path": out},
-        status_configuration={"database_type": "json", "base_path": os.path.join("status", chain)})
-    asyncio.run(_scrape_one(chain, limit=5, single_pass=True, files_types=["PRICE_FULL_FILE"], store_id=store,
-                            file_output=runner._file_outputs[chain], status_database=runner._status_databases[chain]))
-    files = [f for f in glob.glob(os.path.join(out, "**", "*"), recursive=True)
-             if os.path.isfile(f) and re.search(rf"PriceFull.*-0*{store}-20\d{{6}}", os.path.basename(f))]
-    files.sort(reverse=True)                                                                                 # newest first
-    print(f"{chain} store {store}: {[os.path.basename(f) for f in files]}", flush=True)
-    return items_of(text_of(files[0])) if files else {}
-
-def main():
-    data = {}
-    for chain, store in STORES.items():
-        for attempt in (1, 2, 3):
-            try:
-                data[chain] = fetch(chain, store)
-            except Exception:
-                traceback.print_exc(); data[chain] = {}
-            if data[chain]:
-                break
-            print(f"{chain}: attempt {attempt} failed", flush=True)
-        print(f"{chain}: {len(data[chain])} items", flush=True)
-    if not all(data.values()):
-        print("missing data for a chain: prices.tsv NOT updated")
-        sys.exit(1)
-    tsv, report, kw_done = build(data)
-    print("\n".join(report))
-    if kw_done < 20:
-        print(f"only {kw_done} product types found: prices.tsv NOT updated")
-        sys.exit(1)
-    open("prices.tsv", "w", encoding="utf-8").write(tsv)
-    print(f"prices.tsv written: {kw_done} product types, {len(tsv)} bytes")
-
-if __name__ == "__main__":
-    main()
+    ("דבש", r"דבש", r"חרדל|ממרח|עוגיות|טעם|פופקו|עוגת|שיפון|וופל|חטיף|קרם|סבון|שוקולד|גרנולה|ביסקוויט|חמאה|תה|קפה|תירס|שקדים|בוטנים|מיץ|בייגל|ויסקי|דבשת", r""),
+    ("ריבה", r"^ריבה|^ריבת|^ממרח ריבה", r"", r""),
+    ("עדשים", r"עדשים",
